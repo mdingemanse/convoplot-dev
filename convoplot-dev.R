@@ -128,19 +128,21 @@ convplot <- function(uids=NULL,lang=NULL,n=10,
     
     if(dyads) { extracts <- extracts.dyadic }
     
+    #if(participation=="dyadic") {extract <- extracts %>% filter(participant_int %in% c(1,2))}
+    
     p <- extracts %>%
       mutate(striplength = case_when(duration < 300 ~ 3,
                                      duration >= 300 ~ round(duration/90)),
              uttshort = ifelse(nchar <= striplength | nchar <= 4, 
                                utterance,
-                               paste0(stringx::strtrim(utterance,striplength),'~'))) %>%
+                               paste0(stringx::strtrim(utterance,striplength),'~')))%>%
       ggplot(aes(y=participant_int)) +
       theme_tufte() + theme(legend.position = "none",
                             strip.placement = "outside",
                             strip.text = element_text(hjust=0,color="grey50")) +
       ylab("") + xlab("time (ms)") +
-      scale_y_continuous(breaks=c(1:max(extracts$participant_int)),
-                         labels=rev(LETTERS[1:max(extracts$participant_int)])) +
+      scale_y_reverse(breaks=c(1:max(extracts$participant_int)),
+                      labels=LETTERS[1:max(extracts$participant_int)])+
       theme(axis.ticks.y = element_blank()) +
       geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.4,ymax=participant_int+0.4),
                 size=1,fill="grey90",color="white")
@@ -156,7 +158,7 @@ convplot <- function(uids=NULL,lang=NULL,n=10,
                          color="black",hjust=0,size=3)
     }
     
-    p <- p + facet_wrap(~ scope, ncol=1)
+    p <- p + facet_wrap(~ scope, ncol=1, scales="free_y")
     
     return(p)
     
@@ -177,3 +179,4 @@ sample_vals <- function (tbl, size, replace = FALSE, weight = NULL, .env = paren
   idx <- unlist(sampled) + 1
   grouped_df(tbl[idx, , drop = FALSE], vars = groups(tbl))
 }
+
