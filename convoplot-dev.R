@@ -62,10 +62,10 @@ convplot <- function(uids=NULL,lang=NULL,n=10,
         print(paste('...from',lang))
       }
       d.lg <- d %>% filter(language %in% lang)
-      uids <- sample(unique(d.lg$uid),n)
+      uids <- sample(unique(d.lg[!is.na(d.lg$begin),]$uid),n) #make sure not to sample from annotations without time info
       
     } else {
-      uids <- sample(unique(d$uid),n)
+      uids <- sample(unique(d[!is.na(d$begin),]$uid),n) #make sure not to sample from annotations without time info
     }
     
   }
@@ -158,7 +158,11 @@ convplot <- function(uids=NULL,lang=NULL,n=10,
                          color="black",hjust=0,size=3)
     }
     
-    p <- p + facet_wrap(~ scope, ncol=1, scales="free_y")
+    #p <- p + facet_wrap(~ scope, ncol=1, scales="free_y")
+    #switch to facet_grid to be able to use 'space' parameters; vary height of panel, such that grey blocks are equal height
+    # https://stackoverflow.com/questions/28093412/labels-on-top-with-facet-grid-or-space-option-with-facet-wrap
+    #use package ggforce
+    p <- p + ggforce::facet_col(facets=vars(scope), scales="free_y", space="free")
     
     return(p)
     
