@@ -94,29 +94,23 @@ for (r in 1:nrow(df)){
 #PLOT
 
 p <- df %>%
-  mutate(striplength = case_when(duration < 300 ~ 3,
-                                 duration >= 300 ~ round(duration/90)),
-         uttshort = ifelse(nchar <= striplength | nchar <= 4, 
-                           utterance,
-                           paste0(stringx::strtrim(utterance,striplength),'~')))%>%
   ggplot(aes(y=participant_int)) +
   theme_tufte() + theme(legend.position = "none",
-                        strip.placement = "outside",
-                        strip.text = element_text(hjust=0,color="grey50")) +
+                        strip.placement = "none",
+                        strip.text = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank()) +
   ylab("") + xlab("time (ms)") +
   scale_y_reverse(breaks=c(1:max(df$participant_int)),
                   labels=LETTERS[1:max(df$participant_int)])+
-  theme(axis.ticks.y = element_blank()) +
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
-            size=1,fill="grey90",color="white")
+            size=1,fill="grey90")
 
 
-p <- p + geom_rect(data=df %>% filter(talk_rel > 0.8),
-                     aes(xmin=begin0,xmax=end0,
-                         ymin=participant_int-0.6,ymax=participant_int+0.6),
-                     size=1,fill="red",color="white")
-
-
+p <- p + geom_rect(data=df %>% filter(talk_rel > 0.9 | talk_rel < 0.1),
+                   aes(xmin=begin0,xmax=end0,
+                       ymin=participant_int-0.6,ymax=participant_int+0.6),
+                   size=1,fill="red")
 
 
 p <- p + ggforce::facet_col(facets=vars(line), scales="free_y", space="free")
