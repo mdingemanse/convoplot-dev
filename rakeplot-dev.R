@@ -66,7 +66,7 @@ long_dyadic_convos$firstuid[1]
 
 
 # create dataframe
-extract <- convplot(long_dyadic_convos$firstuid[38],datamode=T,before=0,after=extract_length)
+extract <- convplot(long_dyadic_convos$firstuid[71],datamode=T,before=0,after=extract_length)
 
 # we make lines by categorizing begin values into intervals the width of window_size
 # we drop turns that fall outside the larger interval
@@ -81,7 +81,7 @@ extract <- extract %>%
 
 # and we plot
 extract %>% 
-  ggplot(aes(y=participant_int,fill=chunk)) +
+  ggplot(aes(y=participant_int,fill=talk_skew)) +
   theme_tufte() + theme(legend.position = "none",
                         strip.text = element_blank(),
                         axis.ticks.y = element_blank(),
@@ -94,13 +94,53 @@ extract %>%
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
             size=1) +
   facet_wrap(~line,ncol=1)
+
+# # can of course add a separate layer at some specified threshold
+
+extract %>% 
+  ggplot(aes(y=participant_int,fill=talk_skew)) +
+  theme_tufte() + theme(legend.position = "none",
+                        strip.text = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank()) +
+  ggtitle(paste0(extract$langfull[1]," (",extract$source[1],")")) +
+  ylab("") + xlab("time (ms)") +
+  scale_fill_viridis(option="plasma",direction=1,begin=0.2,end=0.8) +
+  scale_y_reverse(breaks=c(1:2),
+                  labels=LETTERS[1:2]) +
+  geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
+            size=1,colour="white") +
+  geom_point(data=extract %>% filter(topturn == 1),
+             aes(x=begin0+200),colour="white",size=4,shape=21,stroke=1) +
+  geom_point(data=extract %>% filter(streak == 1),
+             aes(x=begin0+200),fill="white",colour="white",size=2,shape=21,stroke=1) +
+  facet_wrap(~line,ncol=1)
 filename <- paste0("samples/rakeplot-",extract$uid[1],".png")
 ggsave(filename,width=12,height=4,bg="white")
 
-# # can of course add a separate layer at some specified threshold
-# last_plot() +
-#   geom_rect(data=extract %>% filter(chunk == 1),
-#             aes(xmin=begin0,xmax=end0,
-#                 ymin=participant_int-0.6,ymax=participant_int+0.6),
-#             size=1,fill="red")
-# 
+# more creative
+
+extract %>% 
+  ggplot(aes(y=participant_int,fill=talk_skew)) +
+  theme_tufte() + theme(legend.position = "none",
+                        strip.text = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank()) +
+  ggtitle(paste0(extract$langfull[1]," (",extract$source[1],")"),
+          subtitle = "Mapping load to turn height to show competition") +
+  ylab("") + xlab("time (ms)") +
+  scale_fill_viridis(option="plasma",direction=1,begin=0.2,end=0.8) +
+  scale_y_reverse(breaks=c(1:2),
+                  labels=LETTERS[1:2]) +
+  geom_rect(aes(xmin=begin0,xmax=end0,
+                ymin=participant_int-0.5*load,
+                ymax=participant_int+0.5*load),
+            colour="white") +
+  # geom_point(data=extract %>% filter(topturn == 1),
+  #            aes(x=begin0+200),colour="white",size=4,shape=21,stroke=1) +
+  # geom_point(data=extract %>% filter(streak == 1),
+  #            aes(x=begin0+200),fill="white",colour="white",size=2,shape=21,stroke=1) +
+  facet_wrap(~line,ncol=1)
+filename <- paste0("samples/rakeplot-",extract$uid[1],"-competition.png")
+ggsave(filename,width=12,height=4,bg="white")
+
