@@ -48,10 +48,11 @@ d <- d %>%
 
 # chunk type 2: either highly skewed & dyadic, or flanked by streak items
 
-# d <- d %>%
-#   mutate(chunk = ifelse((talk_skew > 0.4 & participants==2) 
-#                         | lag(streak==1) & lead(streak==1)
-#                         | streak==1 ,1,0))
+d <- d %>%
+  mutate(chunk_incl = ifelse((talk_skew > 0.4 & participants==2)
+                        | lead(streak_pos==1)
+                        | lag(streak==1) & lead(streak==1)
+                        | streak==1 ,1,NA))
 
 
 
@@ -100,7 +101,7 @@ extract <- extract %>%
 
 # and we plot
 extract %>% 
-  ggplot(aes(y=participant_int,fill=chunk)) +
+  ggplot(aes(y=participant_int,fill=chunk_incl)) +
   theme_tufte() + theme(legend.position = "none",
                         strip.text = element_blank(),
                         axis.ticks.y = element_blank(),
@@ -113,6 +114,31 @@ extract %>%
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
             size=0.3,colour="white") +
   facet_wrap(~line,ncol=1)
+filename <- paste0("samples/rakeplot-refine-chunk1-",extract$uid[1],".png")
+ggsave(filename,width=12,height=4,bg="white")
+
+
+# add cricles for cotniuers
+
+extract %>% 
+  ggplot(aes(y=participant_int,fill=chunk_incl)) +
+  theme_tufte() + theme(legend.position = "none",
+                        strip.text = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank()) +
+  ggtitle(paste0(extract$langfull[1]," (",extract$source[1],")")) +
+  ylab("") + xlab("time (ms)") +
+  scale_fill_viridis(option="plasma",direction=1,begin=0.2,end=0.8) +
+  scale_y_reverse(breaks=c(1:2),
+                  labels=LETTERS[1:2]) +
+  geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
+            size=0.3,colour="white") +
+  geom_point(data=extract %>% filter(streak == 1, chunk_incl == 1),
+             aes(x=begin0+200),colour="white",size=3,shape=21,stroke=1) +
+  facet_wrap(~line,ncol=1)
+filename <- paste0("samples/rakeplot-chunkhighlight-circles-",extract$uid[1],".png")
+ggsave(filename,width=12,height=4,bg="white")
+
 
 # # can of course add a separate layer at some specified threshold
 
