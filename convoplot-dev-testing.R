@@ -46,6 +46,8 @@ extract %>%
                   labels=LETTERS[1:2]) +
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
             size=0.3,colour="white") +
+  geom_point(data=extract %>% filter(streak == 0, topturn == 1),
+             aes(x=begin0+200),fill="#7F7F7F",colour="white",size=3,shape=21,stroke=1) +
   geom_point(data=extract %>% filter(streak == 1, chunk_incl == 1),
              aes(x=begin0+200),colour="white",size=3,shape=21,stroke=1) +
   facet_wrap(~line,ncol=1)
