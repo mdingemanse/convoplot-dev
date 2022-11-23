@@ -42,14 +42,16 @@ d <- d %>%
 
 # chunk type 1: flanked by streak items
 d <- d %>%
-  mutate(chunk = ifelse( lag(streak==1) & lead(streak==1) | streak==1 ,1,0))
+  mutate(chunk = ifelse( lead(streak_pos==1) 
+                         | lag(streak==1) & lead(streak==1)
+                         | streak==1 ,1,NA))
 
 # chunk type 2: either highly skewed & dyadic, or flanked by streak items
 
-d <- d %>%
-  mutate(chunk = ifelse((talk_skew > 0.4 & participants==2) 
-                        | lag(streak==1) & lead(streak==1)
-                        | streak==1 ,1,0))
+# d <- d %>%
+#   mutate(chunk = ifelse((talk_skew > 0.4 & participants==2) 
+#                         | lag(streak==1) & lead(streak==1)
+#                         | streak==1 ,1,0))
 
 
 
@@ -83,7 +85,7 @@ long_dyadic_convos$firstuid[1]
 
 
 # create dataframe
-extract <- convplot(long_dyadic_convos$firstuid[5],datamode=T,before=0,after=extract_length)
+extract <- convplot(long_dyadic_convos$firstuid[70],datamode=T,before=0,after=extract_length)
 
 # we make lines by categorizing begin values into intervals the width of window_size
 # we drop turns that fall outside the larger interval
@@ -127,12 +129,15 @@ extract %>%
                   labels=LETTERS[1:2]) +
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
             size=0.2,colour="white") +
+  geom_rect(data=extract %>% filter(chunk == 1),
+            aes(xmin=begin0+200,xmax=end0-200,ymin=participant_int-0.2,ymax=participant_int+0.2),
+            size=0.2,fill="white") +
   geom_point(data=extract %>% filter(topturn == 1),
              aes(x=begin0+200),colour="white",size=4,shape=21,stroke=1) +
   geom_point(data=extract %>% filter(streak == 1),
              aes(x=begin0+200),fill="white",colour="white",size=2,shape=21,stroke=1) +
   facet_wrap(~line,ncol=1)
-filename <- paste0("samples/rakeplot-",extract$uid[1],".png")
+filename <- paste0("samples/rakeplot-chunkhighlight-",extract$uid[1],".png")
 ggsave(filename,width=12,height=4,bg="white")
 
 # more creative
