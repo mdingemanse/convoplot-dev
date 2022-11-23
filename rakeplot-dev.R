@@ -114,7 +114,7 @@ extract %>%
   geom_rect(aes(xmin=begin0,xmax=end0,ymin=participant_int-0.6,ymax=participant_int+0.6),
             size=0.3,colour="white") +
   facet_wrap(~line,ncol=1)
-filename <- paste0("samples/rakeplot-refine-chunk1-",extract$uid[1],".png")
+filename <- paste0("samples/rakeplot-refine-chunk2-",extract$uid[1],".png")
 ggsave(filename,width=12,height=4,bg="white")
 
 
